@@ -14,7 +14,7 @@
 
         public double Price { get; set; }
 
-        public int WarrantyInMonthes { get; set; }
+        public int WarrantyInMonths { get; set; }
 
         public string ImgUrl { get; set; }
     }

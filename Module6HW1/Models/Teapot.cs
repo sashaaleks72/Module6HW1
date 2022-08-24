@@ -1,5 +1,4 @@
 ﻿using System;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Module6HW1.Models
 {
@@ -19,7 +18,7 @@ namespace Module6HW1.Models
 
         public double Price { get; set; }
 
-        public int WarrantyInMonthes { get; set; }
+        public int WarrantyInMonths { get; set; }
 
         public string ImgUrl { get; set; }
     }

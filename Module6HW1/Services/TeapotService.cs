@@ -49,8 +49,8 @@ namespace Module6HW1.Services
                 Description = teapotModel.Description, 
                 Price = teapotModel.Price, 
                 Quantity = teapotModel.Quantity, 
-                ManufacturerCountry = teapotModel.ManufacturerCountry, 
-                WarrantyInMonthes = teapotModel.WarrantyInMonthes, 
+                ManufacturerCountry = teapotModel.ManufacturerCountry,
+                WarrantyInMonths = teapotModel.WarrantyInMonths, 
                 ImgUrl = teapotModel.ImgUrl 
             };
 
@@ -73,7 +73,7 @@ namespace Module6HW1.Services
             editedTeapot.Quantity = teapotModel.Quantity;
             editedTeapot.ImgUrl = teapotModel.ImgUrl;
             editedTeapot.ManufacturerCountry = teapotModel.ManufacturerCountry;
-            editedTeapot.WarrantyInMonthes = teapotModel.WarrantyInMonthes;
+            editedTeapot.WarrantyInMonths = teapotModel.WarrantyInMonths;
 
             await _dataProvider.EditTeapot(editedTeapot);
         }
