@@ -1,8 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Module6HW1.DB;
+using Module6HW1.Exceptions;
+using Module6HW1.Interfaces;
 using Module6HW1.Models;
-using System.Linq;
+using Module6HW1.ViewModels;
+using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Module6HW1.Controllers
@@ -11,92 +13,82 @@ namespace Module6HW1.Controllers
     [ApiController]
     public class TeapotController : ControllerBase
     {
-        private readonly ApplicationDbContext _dbContext;
+        private readonly ITeapotService _teapotService;
 
-        public TeapotController(ApplicationDbContext dbContext)
+        public TeapotController(ITeapotService teapotService)
         {
-            _dbContext = dbContext;
+            _teapotService = teapotService;
         }
 
         [HttpGet("teapots")]
         public async Task<IActionResult> GetTeapots()
         {
-            var teapots = await _dbContext.Teapots.ToListAsync();
-
-            if (teapots.Capacity == 0)
+            List<Teapot> teapots = null;
+            
+            try
             {
-                return NotFound(new { ErrorMessage = "Db is empty!" });
+                teapots = await _teapotService.GetTeapots();
+            }
+            catch (BusinessException ex)
+            {
+                return NotFound(new { ex.ErrorMessage });
             }
 
             return Ok(teapots);
         }
 
         [HttpGet("teapots/{id}")]
-        public async Task<IActionResult> GetTeapotById([FromRoute] int id)
+        public async Task<IActionResult> GetTeapotById([FromRoute] Guid id)
         {
-            var teapot = await _dbContext.Teapots.FirstOrDefaultAsync(x => x.Id == id);
+            Teapot teapot = null;
 
-            if (teapot == null)
+            try
             {
-                return NotFound(new {ErrorMessage = "Teapot with this id is absent!"});
+                teapot = await _teapotService.GetTeapotById(id);
+            }
+            catch (BusinessException ex)
+            {
+                return NotFound(new { ex.ErrorMessage });
             }
 
             return Ok(teapot);
         }
 
         [HttpPost("teapots")]
-        public async Task<IActionResult> AddTeapot([FromBody] Teapot teapotFromBody)
+        public async Task<IActionResult> AddTeapot([FromBody] TeapotViewModel teapotFromBody)
         {
-            var teapot = _dbContext.Teapots.FirstOrDefault(x => x.Id == teapotFromBody.Id);
-
-            if (teapot != null)
-            {
-                return NotFound(new {ErrorMessage = "Teapot with this id exists!" });
-            }
-
-            await _dbContext.Teapots.AddAsync(teapotFromBody);
-            await _dbContext.SaveChangesAsync();
+            await _teapotService.AddTeapot(teapotFromBody);
 
             return Ok(new {SuccessMessage = "Teapot has been added!"});
         }
 
 
-        [HttpPut("teapots")]
-        public async Task<IActionResult> EditTeapotById([FromBody] Teapot teapotFromBody)
+        [HttpPut("teapots/{id}")]
+        public async Task<IActionResult> EditTeapotById([FromRoute] Guid id, [FromBody] TeapotViewModel teapotFromBody)
         {
-            var teapotToEdit = _dbContext.Teapots.FirstOrDefault(x => x.Id == teapotFromBody.Id);
-
-            if (teapotToEdit == null)
+            try
             {
-                return NotFound(new { NotFound = "Teapot with this id is absent!" });
+                await _teapotService.EditTeapotById(id, teapotFromBody);
             }
-
-            teapotToEdit.Title = teapotFromBody.Title;
-            teapotToEdit.Price = teapotFromBody.Price;
-            teapotToEdit.Description = teapotFromBody.Description;
-            teapotToEdit.Capacity = teapotFromBody.Capacity;
-            teapotToEdit.Quantity = teapotFromBody.Quantity;
-            teapotToEdit.ImgUrl = teapotFromBody.ImgUrl;
-            teapotToEdit.ManufacturerCountry = teapotFromBody.ManufacturerCountry;
-            teapotToEdit.WarrantyInMonthes = teapotFromBody.WarrantyInMonthes;
-
-            await _dbContext.SaveChangesAsync();
+            catch (BusinessException ex)
+            {
+                return NotFound(new { ex.ErrorMessage });
+            }
 
             return Ok(new { SuccessMessage = "The teapot has been changed!" });
         }
 
         [HttpDelete("teapots/{id}")]
-        public async Task<IActionResult> DeleteTeapotById([FromRoute] int id)
+        public async Task<IActionResult> DeleteTeapotById([FromRoute] Guid id)
         {
-            var teapotToDelete = _dbContext.Teapots.FirstOrDefault(x => x.Id == id);
-
-            if (teapotToDelete == null)
+            try
             {
-                return NotFound(new { ErrorMessage = "Teapot with this id is absent!" });
+                await _teapotService.DeleteTeapotById(id);
             }
-
-            _dbContext.Teapots.Remove(teapotToDelete);
-            await _dbContext.SaveChangesAsync();
+            catch (BusinessException ex)
+            {
+                return NotFound(new { ex.ErrorMessage });
+            }
 
             return Ok(new { SuccessMessage = "The teapot has been removed!" });
         }

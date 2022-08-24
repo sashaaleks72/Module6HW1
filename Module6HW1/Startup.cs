@@ -6,6 +6,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using Module6HW1.DB;
+using Module6HW1.Interfaces;
+using Module6HW1.Providers;
+using Module6HW1.Services;
 
 namespace Module6HW1
 {
@@ -25,6 +28,8 @@ namespace Module6HW1
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(connection));
             services.AddControllers();
+            services.AddTransient<IDataProvider, DataProvider>();
+            services.AddTransient<ITeapotService, TeapotService>();
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "Module6HW1", Version = "v1" });
